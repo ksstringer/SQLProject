@@ -22,7 +22,9 @@ public class VendorService {
     public void saveVendor(Vendor v) throws VendorException {
         if (v.getVendorName().isEmpty()) {
             throw new VendorException("Vendor Name cannot be null");
-        } else if (vendorDAO.getVendors().contains(v)){  //update to be only name and not both params
+
+            // More efficient to not pull the whole database and instead pull a small subset as needed.
+        } else if (!vendorDAO.getVendorsByName(v.getVendorName()).isEmpty()){  //update to be only name and not both params
             throw new VendorException("Vendor already exists");
         }
         vendorDAO.insertVendor(v);

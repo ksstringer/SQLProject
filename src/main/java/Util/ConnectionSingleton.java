@@ -19,7 +19,7 @@ public class ConnectionSingleton {
     /**
      * url will represent our connection string. Since this is an in-memory db, we will represent a file location to store the data
      */
-    private static String url = "jdbc:h2:./h2/db";
+    private static String URL = "jdbc:h2:./h2/db"; // SCREAMING_SNAKE_CASE is standard for constants.
     /**
      * Default username for connecting to h2
      */
@@ -40,7 +40,7 @@ public class ConnectionSingleton {
     public static Connection getConnection(){
         if(connection == null){
             try {
-                connection = DriverManager.getConnection(url, username, password);
+                connection = DriverManager.getConnection(URL, username, password);
                 resetTestDatabase();
             } catch (SQLException e) {
                 e.printStackTrace();
