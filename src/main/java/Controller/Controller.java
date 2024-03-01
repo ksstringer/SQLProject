@@ -18,6 +18,8 @@ import java.util.List;
 
 public class Controller {
 
+    // Constants are useful when reusing strings so you only have to modify in one play when changing.
+    // This can go in a dedicated constants file if desired.
     public static final String VENDOR_ID_QUERY_PARAM = "vendor_id";
     private VendorService vendorService;
     private ProductService productService;
