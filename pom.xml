@@ -11,6 +11,10 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <!-- You can also define dependency versions in the properties section for use below. -->
+        <!-- This is generally a best practice and helps when you have multiple dependencies -->
+        <!-- of the same library so you only have to change it in one place if it changes. -->
+        <junit.version>4.13.2</junit.version>
     </properties>
     <!--    maven allows us to use external dependencies from mvn repository.
             meaning, we're downloading java classes that other developers have written and can
@@ -20,7 +24,7 @@
             <!-- junit, our framework for writing unit tests.-->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.javalin/javalin -->
         <dependency>

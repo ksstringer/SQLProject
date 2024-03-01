@@ -3,8 +3,10 @@ package Model;
 import java.util.Objects;
 
 public class Vendor {
-    public int vendorId;
-    public String vendorName;
+    // We have getters and setter so that we can control how these fields are accessed. Making them
+    // private forces consumers to use these methods instead of accessing the fields directly.
+    private int vendorId;
+    private String vendorName;
 
     public Vendor(){
 

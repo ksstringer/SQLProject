@@ -9,6 +9,7 @@ import Service.VendorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -17,12 +18,17 @@ import java.util.List;
 
 public class Controller {
 
-    VendorService vendorService;
-    ProductService productService;
+    public static final String VENDOR_ID_QUERY_PARAM = "vendor_id";
+    private VendorService vendorService;
+    private ProductService productService;
+    private ObjectMapper objectMapper;
 
-    public Controller(VendorService vendorService, ProductService productService){
+    public Controller(VendorService vendorService, ProductService productService) {
         this.vendorService = vendorService;
         this.productService = productService;
+        // Moving the initialization of object mapper to the constructor makes it get called once, instead of
+        // once per API request. More efficient code.
+        objectMapper = new ObjectMapper();
     }
 
 
@@ -32,14 +38,14 @@ public class Controller {
         //VENDORS
         app.post("vendor", context -> {
             try {
-                ObjectMapper om = new ObjectMapper();
-                Vendor v = om.readValue(context.body(), Vendor.class);
-                vendorService.saveVendor(v);
-                context.status(201);
-                context.json(v);
+                Vendor vendor = objectMapper.readValue(context.body(), Vendor.class);
+                vendorService.saveVendor(vendor);
+                // Using constants can help with clarity
+                context.status(HttpStatus.CREATED);
+                context.json(vendor);
             } catch (JsonProcessingException e) {
                 context.result(e.getMessage());
-                context.status(400);
+                context.status(HttpStatus.BAD_REQUEST);
             }
         });
 
@@ -49,39 +55,43 @@ public class Controller {
         });
 
         app.get("vendor/{vendor_id}", context -> {
-            int vendorID = Integer.parseInt(context.pathParam("vendor_id"));
-            try{
+            int vendorID = Integer.parseInt(context.pathParam(VENDOR_ID_QUERY_PARAM));
+            try {
                 Vendor v = vendorService.getVendorById(vendorID);
                 context.json(v);
-            }catch (VendorException e){
+            } catch (VendorException e) {
                 context.status(404);
                 context.result(e.getMessage());
             }
         });
 
         app.put("vendor/{vendor_id}", context -> {
-            ObjectMapper om = new ObjectMapper();
-            Vendor v = om.readValue(context.body(), Vendor.class);
-            int id = Integer.parseInt(context.pathParam("vendor_id"));
-            try{
+            Vendor v = objectMapper.readValue(context.body(), Vendor.class);
+            int id = Integer.parseInt(context.pathParam(VENDOR_ID_QUERY_PARAM));
+            try {
                 vendorService.updateVendor(v, id);
                 context.json(v);
-            }catch (VendorException e){
+            } catch (VendorException e) {
                 context.status(400);
                 context.result(e.getMessage());
             }
         });
 
 
-        //PRODUCTS
+        // Separating out logically separate code can help organize and enhance readability
+        initializeProductEndpoints(app);
+
+        return app;
+    }
+
+    private void initializeProductEndpoints(Javalin app) {
         app.post("product", context -> {
-            ObjectMapper om = new ObjectMapper();
-            Product p = om.readValue(context.body(), Product.class);
-            try{
+            Product p = objectMapper.readValue(context.body(), Product.class);
+            try {
                 productService.saveProduct(p);
                 context.status(201);
                 context.json(p);
-            }catch(ProductException e){
+            } catch (ProductException e) {
                 context.status(400);
                 context.result(e.getMessage());
             }
@@ -94,10 +104,10 @@ public class Controller {
 
         app.get("product/{product_id}", context -> {
             int productID = Integer.parseInt(context.pathParam("product_id"));
-            try{
+            try {
                 Product p = productService.getProductById(productID);
                 context.json(p);
-            }catch (ProductException e){
+            } catch (ProductException e) {
                 context.status(400);
                 context.result(e.getMessage());
             }
@@ -106,23 +116,22 @@ public class Controller {
         ///RETURNING ALL PRODUCTS
         app.get("product?soldBy={sold_by}", context -> {
             int soldBy = Integer.parseInt(context.pathParam("sold_by"));
-            try{
+            try {
                 List<Product> p = productService.getProductByVendor(soldBy);
                 context.json(p);
-            }catch (ProductException e){
+            } catch (ProductException e) {
                 context.status(400);
                 context.result(e.getMessage());
             }
         });
 
         app.put("product/{product_id}", context -> {
-            ObjectMapper om = new ObjectMapper();
-            Product p = om.readValue(context.body(), Product.class);
+            Product p = objectMapper.readValue(context.body(), Product.class);
             int id = Integer.parseInt(context.pathParam("product_id"));
-            try{
+            try {
                 productService.updateProduct(p, id);
                 context.json(p);
-            }catch (ProductException e){
+            } catch (ProductException e) {
                 context.status(400);
                 context.result(e.getMessage());
             }
@@ -133,8 +142,5 @@ public class Controller {
             productService.deleteProduct(productID);
             context.status(200);
         });
-
-
-        return app;
     }
 }

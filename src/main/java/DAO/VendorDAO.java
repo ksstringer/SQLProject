@@ -29,6 +29,26 @@ public class VendorDAO {
         }
     }
 
+    //get vendor from table "Vendor" with a matching name
+    public List<Vendor> getVendorsByName(String vendorName) {
+        List<Vendor> vendorList = new ArrayList<>();
+        try{
+            PreparedStatement ps = conn.prepareStatement("select * from Vendor where vendor_name = ?");
+            ps.setString(1, vendorName);
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                int resultID = resultSet.getInt("vendor_id");
+                String resultName = resultSet.getString("vendor_name");
+                Vendor v = new Vendor(resultID, resultName);
+                vendorList.add(v);
+            }
+        }catch (SQLException e) {
+            //add better messaging
+            e.printStackTrace();
+        }
+        return vendorList;
+    }
+
     //get all vendors from table "Vendor"
     public List<Vendor> getVendors(){
         List<Vendor> vendorList = new ArrayList<>();
